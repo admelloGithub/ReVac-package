@@ -1,0 +1,20 @@
+#Copy or symlink the following shell scripts into a standard area
+/usr/local/projects/ergatis/package-v1r35rc//bin/annotate-partitions
+/usr/local/projects/ergatis/package-v1r35rc//bin/create_bam_coverage_iterator_list
+/usr/local/projects/ergatis/package-v1r35rc//bin/create_bwa_mem_iterator_list
+/usr/local/projects/ergatis/package-v1r35rc//bin/extract-partitions
+/usr/local/projects/ergatis/package-v1r35rc//bin/filter-abund
+/usr/local/projects/ergatis/package-v1r35rc//bin/filter-below-abund
+/usr/local/projects/ergatis/package-v1r35rc//bin/filter-stoptags
+/usr/local/projects/ergatis/package-v1r35rc//bin/find-knots
+/usr/local/projects/ergatis/package-v1r35rc//bin/find_intergenic_background_cutoff
+/usr/local/projects/ergatis/package-v1r35rc//bin/gff3_to_gbrowse
+/usr/local/projects/ergatis/package-v1r35rc//bin/lgt_bwa_post_process
+/usr/local/projects/ergatis/package-v1r35rc//bin/lgtanalysis
+/usr/local/projects/ergatis/package-v1r35rc//bin/load-graph
+/usr/local/projects/ergatis/package-v1r35rc//bin/merge-partitions
+/usr/local/projects/ergatis/package-v1r35rc//bin/normalize-by-median
+/usr/local/projects/ergatis/package-v1r35rc//bin/partition-graph
+/usr/local/projects/ergatis/package-v1r35rc//bin/seqfileparse
+/usr/local/projects/ergatis/package-v1r35rc//bin/strip-partition
+/usr/local/projects/ergatis/package-v1r35rc//bin/validate_genbank

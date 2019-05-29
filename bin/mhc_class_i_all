@@ -1,0 +1,62 @@
+#!/bin/sh
+if [ -z "$SCHEMA_DOCS_DIR" ]
+then
+    SCHEMA_DOCS_DIR=
+export SCHEMA_DOCS_DIR
+fi
+if [ -z "$WORKFLOW_WRAPPERS_DIR" ]
+then
+    WORKFLOW_WRAPPERS_DIR=/usr/local/projects/ergatis/package-revac//bin
+export WORKFLOW_WRAPPERS_DIR
+fi
+if [ -z "$WORKFLOW_DOCS_DIR" ]
+then
+    WORKFLOW_DOCS_DIR=
+export WORKFLOW_DOCS_DIR
+fi
+
+
+umask 0000
+
+unset PERL5LIB
+unset LD_LIBRARY_PATH
+
+LANG=C
+export LANG
+LC_ALL=C
+export LC_ALL
+#Exporting python for use
+
+export PATH=/usr/local/packages/python-2.7.12/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/packages/python-2.7.12/lib:$LD_LIBRARY_PATH
+
+#Actual script starts here.
+mhc_class_i_path=${BASH_ARGV[${#BASH_ARGV[@]}-1]}
+output_path=$BASH_ARGV
+regex=".fsa"
+
+
+list=$(echo "${BASH_ARGV[@]}")
+arr=($list)
+
+reverse()
+{
+  local arrayname=${1:?Array name required} array revarray e
+
+  eval "array=( \"\${$arrayname[@]}\" )"
+
+  for e in "${array[@]}"
+  do
+    revarray=( "$e" "${revarray[@]}" )
+  done
+
+  eval "$arrayname=( \"\${revarray[@]}\" )"
+}
+
+reverse arr
+args=$(echo "${arr[@]}")
+cmd="$args"
+eval "$cmd"
+#####
+
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>bcell_pred_all commands list</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>bcell_pred_all methods cmd list</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/bcell_pred_all_cmdgen.pl</executable>
+            <arg>/usr/local/packages/python-2.7.14/bin/python $;BCELL_EXEC$; $;I_FILE_PATH$;</arg>
+	    <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+	    <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.raw</value>
+            </param>	
+	</command>
+    </commandSet>
+</commandSetRoot>

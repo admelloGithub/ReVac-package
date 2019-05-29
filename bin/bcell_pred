@@ -1,0 +1,42 @@
+#!/bin/sh
+if [ -z "$SCHEMA_DOCS_DIR" ]
+then
+    SCHEMA_DOCS_DIR=
+export SCHEMA_DOCS_DIR
+fi
+if [ -z "$WORKFLOW_WRAPPERS_DIR" ]
+then
+    WORKFLOW_WRAPPERS_DIR=/usr/local/projects/ergatis/package-revac//bin
+export WORKFLOW_WRAPPERS_DIR
+fi
+if [ -z "$WORKFLOW_DOCS_DIR" ]
+then
+    WORKFLOW_DOCS_DIR=
+export WORKFLOW_DOCS_DIR
+fi
+
+
+umask 0000
+
+unset PERL5LIB
+unset LD_LIBRARY_PATH
+
+LANG=C
+export LANG
+LC_ALL=C
+export LC_ALL
+
+PERL_MOD_DIR=/usr/local/projects/ergatis/package-revac//lib/5.8.8
+export PERL_MOD_DIR
+
+export PERL5LIB=/usr/local/projects/ergatis/package-revac//lib/perl5/
+
+#Exporting python
+export PATH=/usr/local/packages/python-2.7.12/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/packages/python-2.7.12/lib:$LD_LIBRARY_PATH
+
+#python="/usr/local/packages/Python-2.7/bin/python2.7"
+
+     /usr/bin/perl /usr/local/projects/ergatis/package-revac/bin/bcell_pred.pl "$@" 
+
+

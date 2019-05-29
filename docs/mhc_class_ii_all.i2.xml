@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>mhc_class_ii_all compute</name>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Trimming sequence gaps</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/trim_partial_aa_sequences.pl</executable>
+            <arg>$;FILE_PATH$;</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>mhc_class_ii_all</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/mhc_class_ii_all</executable>
+            <arg>$;MHC_II$; $;METHOD$; $;ALLELE$; $;FILE_PATH$;.trimmed</arg>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.out.stderr</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.out</value>
+            </param>            
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Post-processing of raw output and conversion to 2 column table</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/mhc_class_ii2cutoff.pl</executable>
+            <arg>$;FILE_PATH$;.trimmed $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.out</arg>
+			<param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.cutoff.stderr</value>
+            </param>
+        </command>
+    </commandSet>
+</commandSetRoot>
+

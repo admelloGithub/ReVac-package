@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <state>incomplete</state>
+        <name>summary_table workflow</name>
+        <!--Preprocessing-->
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create output directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create temp directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;TMP_DIR$;</arg>
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Fetching component2table files and merging hmmpfams</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/fetch_component2table_files.pl</executable>
+            <arg>-o $;OUTPUT_REPO$; -p $;P_ID$; -l $;COMP_LIST$;</arg>
+			<param>  
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.list</value>
+            </param>
+			<param>  
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.list.stderr</value>
+            </param>
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Running surface_table_2.0</name>
+            <state>incomplete</state>
+            <executable>cat $;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.list |xargs $;BIN_DIR$;/surface_table_2.0.pl|sort -k1</executable>
+            <param>
+                <key>stdout</key>
+                <value>$;SUMM_TABLE$;</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.out.stderr</value>
+            </param>
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Running recall orthologs</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/revac_wrapper.pl -o $;ORTHOLOGY$; -a $;AC$; -n $;NOOFGEN$; -c $;CONSERVATION$; -t $;SUMM_TABLE$; -d $;OUTPUT_DIRECTORY$;</executable>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/recall.stdout</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.recall.out.stderr</value>
+             </param>
+         </command>
+    </commandSet>
+</commandSetRoot>

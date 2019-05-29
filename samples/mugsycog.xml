@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+	<state>incomplete</state>
+	<name>mugsy cog</name>
+	<!--Preprocessing-->
+	<command>
+	    <type>RunUnixCommand</type>
+	    <name>create output directory</name>
+	    <state>incomplete</state>
+	    <executable>mkdir</executable>
+	    <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
+	</command>
+	<command>
+	    <type>RunUnixCommand</type>
+	    <name>create temp directory</name>
+	    <state>incomplete</state>
+	    <executable>mkdir</executable>
+	    <arg>-p -m 777 $;TMP_DIR$;</arg>
+	</command>
+	<!--Processing-->
+	<!-- hack to make sure these following commands will run other than master node -->
+	<command>
+	    <type>RunUnixCommand</type>
+	    <name>replace template keys</name>
+	    <state>incomplete</state>
+	    <executable>$;BIN_DIR$;/replace_template_keys</executable>
+	    <param>
+		<key>--template_xml</key>
+		<value>$;DOCS_DIR$;/mugsycog_distributed_work.xml</value>
+	    </param>
+	    <param>
+		<key>--component_conf</key>
+		<value>$;COMPONENT_CONFIG$;</value>
+	    </param>
+	    <param>
+		<key>--output_xml</key>
+		<value>$;WORKFLOW_REPOSITORY$;/mugsycog_distributed_work.xml.gz</value>
+	    </param>
+	    <param>
+		<key>--distribopts</key>
+		<value>nodistrib=$;NODISTRIB$;</value>
+	    </param>
+	    <param>
+		<key>stdout</key>
+		<value>$;TMP_DIR$;/replace_template_keys.stdout</value>
+	    </param>
+	    <param>
+		<key>stderr</key>
+		<value>$;TMP_DIR$;/replace_template_keys.stderr</value>
+	    </param>
+	</command>
+	<command>
+		<type>RunUnixCommand</type>
+		<name>Fix mugsy_map file</name>
+		<state>incomplete</state>
+		<executable>awk '$3!="-" &amp;&amp; $4!="-" &amp;&amp; $5!="-" &amp;&amp; $6!="-" &amp;&amp; $7!="-"' $;MUGSY_MAP_FILE$;</executable>
+		<param>
+                	<key>stdout</key>
+                	<value>$;MUGSY_MAP_FILE$;.tmp</value>
+        	</param>
+	</command>
+	<command>
+		<type>RunUnixCommand</type>
+		<name>Move mugsy_map file</name>
+		<state>incomplete</state>
+		<executable>/bin/mv</executable> 
+		<arg>$;MUGSY_MAP_FILE$;.tmp $;MUGSY_MAP_FILE$;</arg>
+	</command>
+	<commandSet type="remote-serial">
+	    <state>incomplete</state>
+	    <name>mugsycog distributed work</name>
+	    <fileName>$;WORKFLOW_REPOSITORY$;/mugsycog_distributed_work.xml.gz</fileName>
+	    <dceSpec type="sge">
+		<OS>linux</OS>
+        <group>$;PROJECT_CODE$;</group>
+	    </dceSpec>
+        </commandSet>
+    </commandSet>
+</commandSetRoot>
+
+

@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Cwd;
+use File::Copy;
+
+
+my $pwd = cwd();
+my $input = $ARGV[0]; #Accepts cmd line multi.fasta list file as input
+my $output = $ARGV[1]; #Path to output folder with some file name
+
+if ($ARGV[2]) {
+	print "Please enter a single input file followed by output file destination and name.\n";
+	exit;
+}
+
+
+if ($input =~ /.list$/) {
+
+	open (my $fh, "<", "$input") 
+		or die "Failed to open bsml2fasta.multi list:$!\n";
+
+	my $file = <$fh>;
+
+	close $fh
+ 	or die "Failed to close bsml2fasta.multi list:$!\n";
+	
+	$file =~ s/^\s+//;
+	$file =~ s/\s+$//;
+
+	
+	$input = $file;
+}
+
+
+if ($input =~ /.fsa$/) {
+		copy("$input","/usr/local/projects/PNTHI/tools/SPAAN/query.dat") or die "Copy failed: $!";  #SPAAN runs from local input query.dat
+}
+
+else {
+
+	print "Please enter a valid fasta formatted .fsa file\n";
+	exit;
+}
+
+
+if (copy("$input","/usr/local/projects/PNTHI/tools/SPAAN/query.dat") == 1) {
+
+	chdir("/usr/local/projects/PNTHI/tools/SPAAN") or die "$!";
+
+        system("/usr/local/projects/PNTHI/tools/SPAAN/askquery");
+
+	copy("/usr/local/projects/PNTHI/tools/SPAAN/query.out","$output/spaan.output") or die "Copy failed: $!";
+
+	system("rm query.out");
+	system("rm query.dat");
+
+	#print "Check /home/admello/Desktop/spaan/spaan.output \n";
+
+	chdir("$pwd") or die "$!";
+
+}
+
+else {
+	print "Invalid file!\n";
+}
+################################

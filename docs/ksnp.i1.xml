@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>ksnp compute</name>
+	
+	 <!--Preprocessing-->
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create output directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</arg>
+        </command>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>merge contigs</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/ksnp_merge_reference</executable>
+	    <param>
+	    <key>--input</key>
+                <value>$;I_FILE_PATH$;</value>
+	    </param>
+            <arg> >$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.merged.fsa </arg>
+        </command>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>parse reference fasta header</name>
+            <state>incomplete</state>
+            <executable>$;KSNP_DIR$;/genome_names.pl</executable>
+            <arg>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.$;OUTPUT_TOKEN$;.fna >$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/ksnp.reference</arg>
+        </command>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>merge input and reference</name>
+            <state>incomplete</state>
+            <executable>cat</executable>
+            <arg>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.$;OUTPUT_TOKEN$;.fna $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.merged.fsa >$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/inputandref.fsa</arg>
+        </command>
+
+	
+
+	<!-- end of pre processing -->
+
+        <command>
+            <type>RunUnixCommand</type>
+            <name>ksnp</name>
+            <state>incomplete</state>
+            <executable>$;KSNP_EXEC$;</executable>
+            <arg> -f $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/inputandref.fsa -d $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/ -k $;Kmer$; -p $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/ksnp.reference</arg>
+            <param>  
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stdout</value>
+            </param>
+	    <param>  
+		<key>stderr</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+	    </param>
+        </command>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>create raw output</name>
+            <state>incomplete</state>
+            <executable>mv</executable>
+            <arg>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/SNPs_all_labelLoci $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.raw</arg>
+            <param>  
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stdout</value>
+            </param>
+        </command>
+	
+	<command>
+            <type>RunUnixCommand</type>
+            <name>convert ksnp to nucmer output</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/ksnp_to_addgeneinfo</executable>
+            <param>  
+                <key>--input</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.raw</value>
+            </param>
+	    <arg> >$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.ksnp2nucmer.snps</arg>
+        </command>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>convert nucmer output to snp add gene info</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/ksnp-add-gene-info</executable>
+	    <param>  
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.ksnp-show-genes.stdout</value>
+            </param>
+	    <param>  
+                <key>stderr</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.ksnp-show-genes.stderr</value>
+            </param>
+            <param>  
+                <key>--reference_genbank</key>
+                <value>$;REFERENCE_GENBANK$;</value>
+	    </param>
+	    <param>
+		<key>--show_snps_file</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.ksnp2nucmer.snps</value>
+            </param>
+            <param>
+		<key>--query_fasta</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.merged.fsa</value>
+            </param>
+            <param>
+		<key>--output</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.ksnp-show-genes.tab</value>
+            </param>
+        </command>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>remove temp dir</name>
+            <state>incomplete</state>
+            <executable>rm</executable>
+            <arg>-rf $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/TemporaryFilesToDelete</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>remove fsplit dir</name>
+            <state>incomplete</state>
+            <executable>rm</executable>
+            <arg>-rf $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/Dir.fsplit*</arg>
+        </command>
+        
+    </commandSet>
+</commandSetRoot>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>autoimmunity compute</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>autoimmunity</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/autoimmunity</executable>
+            <arg>-mm=$;MISMATCH$; -ml=$;MIN_LENGTH$; -ss=$;SUBSTITUTIONS$; -p1=$;I_FILE_PATH$; -db=$;DATABASE_PATH$; -bp=$;BLASTALL_EXEC$; -o=$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/</arg>
+	    <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+	 </command>
+     <command>
+            <type>RunUnixCommand</type>
+            <name>autoimmunity2table</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/autoimmunity2table.pl</executable>
+            <arg>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/HomolPept2H_sapiens_l$;MIN_LENGTH$;_s$;SUBSTITUTIONS$;_m$;MISMATCH$;/$;I_FILE_BASE$;.fsa</arg>
+	<param>
+            <key>stdout</key>
+            <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.autoimmunity2table.out</value>
+	</param>
+	</command>
+    </commandSet>
+</commandSetRoot>

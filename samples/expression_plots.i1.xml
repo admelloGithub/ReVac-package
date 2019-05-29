@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>expression_plots</name>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>expression_plots</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/expression_plots</executable>            
+            <param>
+                <key>--infile</key>
+                <value>$;INPUT_FILE$;</value>
+            </param>
+           <param>
+                <key>--analysis</key>
+                <value>$;ANALYSIS$;</value>
+            </param>  
+            <param>
+                <key>--lfc</key>
+                <value>$;LFC$;</value>
+            </param>
+           <param>
+                <key>--fdr</key>
+                <value>$;FDR$;</value>
+            </param>  
+            <param>
+                <key>--gene_col</key>
+                <value>$;GENE_COL$;</value>
+            </param>
+           <param>
+                <key>--rpkm_col</key>
+                <value>$;RPKM_COL$;</value>
+            </param>  
+
+            <param>
+                <key>--outdir</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;</value>
+            </param>
+            <param>
+                <key>--r_bin_dir</key>
+                <value>'$;R_BIN_DIR$;'</value>
+            </param>
+            <param>
+                <key>--r_params</key>
+                <value>'$;R_PARAMS$;'</value>
+            </param>
+            <param>
+                <key>--r_script</key>
+                <value>$;R_SCRIPT$;</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/expression_plots.stdout</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/expression_plots.stderr</value>
+            </param>
+            <arg>$;OTHER_ARGS$;</arg>
+        </command>
+    </commandSet>
+</commandSetRoot>

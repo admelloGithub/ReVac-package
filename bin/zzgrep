@@ -1,0 +1,313 @@
+#!/usr/local/bin/perl
+
+# $Id: zgrep,v 1.1 1996/07/03 18:21:25 lixinz Exp $
+
+# $Log: zgrep,v $
+# Revision 1.1  1996/07/03  18:21:25  lixinz
+# Initial revision
+#
+# Revision 1.1  1996/07/03  18:21:25  lixinz
+# Initial revision
+#
+
+## for too complicated database searching/retrieving, indexing such as
+## yank is probably a better alternative.
+
+# bugs: no bugs found yet :-) but:
+# searching engine can be made faster, I believe.
+# i'll do it when i get time :-)
+
+sub Usage {
+    print <<_EOB_;
+zgrep - a perl version of grep-alike, good for small text database searching.
+Usage: zgrep <switches/options> searching_string
+Options: 
+1. Datebase format: -r needs an argument; others are switches.
+-g: GenBank/EMBL/DDBJ.
+-p: PIR.
+-s: Swiss-Prot.
+-f: FASTA.
+-b: blank line as record delimiter.
+-r: Specify record delimiter.  Default is newline.  Therefore, this 
+    program runs like fgrep with none of the above switches specified.
+2. Searching method: the followings are all siwtches.
+-i: Case insensitive search.
+-a: Insert word delimiter before searching string as "\\bstring".
+-e: Insert word delimiter after searching string as "string\\b".
+    -a and -e can be specified at the same time.  Default is to search
+    for searching string anywhere in the database record.
+-n: When searching fasta file, -n defines the searching string as the first
+    word after >.
+-v: Fetch record(s) that has no searching string.  -v can be combined
+    with -a, -e, and -i.  -v does not work with -m.
+-z: When -m is specified and -d database file is small enough to fit
+    into the memory, this switch should make program run faster,
+    especially when -m lookup file is particularly long.  This switch
+    also make sure there is no duplicate record in output even if the
+    input database contains duplicated records (I should say fasta
+    sequences with the same sequence name).  However, this switch does
+    not eliminate duplicates resulted from repeated searching strings
+    in -m lookup table.  See -m below.
+3. Searching string(s) file and searched database file - arguments
+-d: Database file.
+-o: Output file.  This will not work for -m (see below).
+-l: Lookup file containing searching strings; one string per line.
+    Spaces are allowed anywhere in the searching string.
+-m: Lookup file: each line itself is a simplified version of -l lookup
+    file.  Each line has the format like this: id, string1, string2,
+    string3,...  Adjacent fields in -m lookup file are separated by a
+    tab. The output from each line will be written into a single
+    multiple fasta file that is to be named after the string of the
+    first field (id field).  This options is used for retrieving
+    multiple fasta entries.  Other options except -d, -a, and -e do
+    not work with -m!  Searching strings must be the sequence names
+    (first word of the comment line in each fasta sequence).
+    Duplicates or entries that contain the same searching string will
+    all pulled out - users should make sure there are no duplicates in
+    db, and searching strings make sense.  If a single searching
+    string appears more than once in the -m lookup table, the record
+    that contains that string will repeat the same number of times in
+    the output file(s). That's true UNIX -- users should know what
+    they are doing.  If you want to get output without any duplicate
+    due to duplicates in input database (bad db :-), please use -z
+    switch.  See -z above.
+4. Searching strings can be specified as one command line argument.  They
+   can also be piped in.  More than one strings can be separated by |,
+    such as "X09876|P12345", or many strings can be specified as
+    auguments as soon as they are the last things at the command line.
+    Any legal perl regexp can be used.
+_EOB_
+    exit;
+}
+
+use Getopt::Std;
+getopts ('abd:efghil:m:no:pr:vsz');
+Usage if $opt_h;
+# $opt_* are used as global scalar later...
+
+## Searching string(s) from a file (-l), or stdin or command line
+if ($opt_l) {
+    open (TMP,"$opt_l") || die "cannot open $opt_l.\n";;
+    while (<TMP>) {
+	next if /^\s*\n/;
+	chop;
+	push (@list,$_);
+    }
+    close (TMP);
+} elsif ($opt_m) {
+    %readlookup = ReadLookupTable ($opt_m);
+} else {
+    if (@ARGV) {
+	$pattern = join "\|", @ARGV; # $pattern .= shift @ARGV until @ARGV==0;
+    } else {
+	$pattern .= $_ while (<>);
+    }
+    @list = split (/\|/,$pattern);
+}
+
+## Modifying searching string a bit
+if ($opt_a) { for (@list) { s/(.*)/\\b$1/; }}
+if ($opt_e) { for (@list) { s/(.*)/$1\\b/; }}
+if ($opt_f && $opt_n) { for (@list) { s/(.*)/>$1/; }}
+
+## RS of databases
+if ($opt_g || $opt_s) {
+    $/ = "//\n";
+} elsif ($opt_p) {
+    $/ = "///\n";
+} elsif ($opt_f || $opt_m) {
+    $/ = "\n>";
+} elsif ($opt_r) {
+    $/ = $opt_r;
+} elsif ($opt_b) {
+    $/ = "";
+} else {
+    $/ = "\n";
+}
+
+## Searching method
+#($opt_i) ? ($i="i") : ($i=""); # does not need for now due to no eval below
+
+## Main; a faster version seems to theoretically exist
+if ($opt_m && !$opt_z ) {
+    foreach $family (sort keys %readlookup) {
+	open (FAMILY,">$family") || die "cannot generate $family\n";
+	select (FAMILY);
+        $/="\n>";      ## always so for -m!
+	open(IN,"$opt_d") if $opt_d || die "cann't open database $opt_d.\n";
+	while (<IN>) { ## output seqs are not in the order of -m lookup file
+	    $_ = FixFasta ($_);
+	    for ($i=0;$i<@{$readlookup{$family}};$i++) {
+#		print, last if /$readlookup{$family}[$i]/;
+# users are responsible for making sure no duplicates...
+		print if /$readlookup{$family}[$i]/;
+	    }
+	}
+	close (FAMILY);
+    }
+
+} elsif ($opt_m && $opt_z) {
+    %readdb = ReadDatabase ($opt_d);
+    foreach $family (sort keys %readlookup) {
+	open (FAMILY,">$family") || die "cannot generate $family\n";
+	select (FAMILY);
+	for ($i=0;$i<@{$readlookup{$family}};$i++) {
+	    print "$readdb{$readlookup{$family}[$i]}[0]";
+	    print "$readdb{$readlookup{$family}[$i]}[1]";
+	}
+	close (FAMILY);
+    }
+
+} elsif ($opt_l && !opt_z) {
+    if ($opt_o) {
+	open (OUT,">$opt_o") || die "cannot write $opt_o.\n";
+	select OUT;
+    }
+    open(IN,"$opt_d") if $opt_d || die "cann't open database $opt_d.\n";
+    while (<IN>) {
+	$_ = FixFasta ($_) if ($opt_f);
+	($opt_v) ? (PatternV ($_,*list)) : (Pattern ($_,*list));
+    }
+
+} else {  # -d w/ command line searching patterns, for example.
+    if ($opt_o) {
+	open (OUT,">$opt_o") || die "cannot write $opt_o.\n";
+	select OUT;
+    }
+    open(IN,"$opt_d") if $opt_d || die "cann't open database $opt_d.\n";
+    while (<IN>) {
+	$_ = FixFasta ($_) if ($opt_f);
+	($opt_v) ? (PatternV ($_,*list)) : (Pattern ($_,*list));
+    }
+}
+
+close (IN);
+close (OUT) if ($opt_o);
+exit;
+
+sub FixFasta {
+    local ($_) = @_;
+    chop if />$/;
+    $_ = "\>" . "$_" if ! /^>/;
+    return ($_);
+}
+
+sub Pattern {
+    local ($string,*list) = @_;
+    $_ = $string;
+    foreach $pattern (@list) {
+	if ($opt_i) {
+	    print,last if /$pattern/i;
+	    next;
+	} else {
+	    print,last if /$pattern/;
+	    next;
+	}
+    }
+    return;
+}
+
+sub PatternV {
+    local ($string,*list) = @_;
+    local($j)=0;
+    $_ = $string;
+    foreach $pattern (@list) {
+	if ($opt_i) {
+	    $j++;
+	    if (/$pattern/i) {
+		last;
+	    } else {
+		($j == $#list+1) ? print : next;
+	    }
+	} else {
+	    $j++;
+	    if (/$pattern/) {
+		last;
+	    } else {
+		($j == $#list+1) ? print : next;
+	    }
+	}
+    }
+    return;
+}
+
+## This assumes the db file is small enough to be able to fit into the
+## memory.
+## not the best way yet...
+## should: try to load everything into memory ONCE;
+## if fail, go to -m && !$z
+sub ReadDatabase {
+    local ($db) = @_;
+    local (%newdb,$file) = ();
+    undef $/;
+    open (DB,"$db") || die "cann't open database $db.\n";
+    $file = <DB>;
+    close (DB);
+    @db = split (/>/,$file);
+    for (@db) {
+	($title,$sequence) = /(.+\n)([\s\S]+)/;
+	$title = ">"."$title";
+	$_ = $title;
+	($seqname) = /^>(\S+).*/;
+	$newdb{$seqname} = [($title,$sequence)];
+    }
+    return %newdb; ## things are read to print now...
+};
+
+sub ReadLookupTable {
+    local ($lookup) = @_;
+    local (%cluster,$family,@members) = ();
+    $/="\n";
+    open (CLUSTER,"$lookup") || die "cann't open lookup file $lookup.\n";
+    while (<CLUSTER>) {
+	chop;
+	($family,@members) = split (/\s+/,$_);
+	$cluster{$family} = [@members];
+    }
+    close (CLUSTER);
+    return %cluster;
+}
+
+## Searching string(s) from a file (-l), or stdin or command line
+if ($opt_l) {
+    open (TMP,"$opt_l") || die "cannot open $opt_l.\n";;
+    while (<TMP>) {
+	next if /^\s*\n/;
+	chop;
+	push (@list,$_);
+    }
+    close (TMP);
+} elsif ($opt_m) {
+    %readlookup = ReadLookupTable ($opt_m);
+} else {
+    if (@ARGV) {
+	$pattern = join "\|", @ARGV; # $pattern .= shift @ARGV until @ARGV==0;
+    } else {
+	$pattern .= $_ while (<>);
+    }
+    @list = split (/\|/,$pattern);
+}
+
+
+__END__
+
+
+## Searching string(s) from a file (-l), or stdin or command line
+if ($opt_l) {
+    open (TMP,"$opt_l") || die "cannot open $opt_l.\n";;
+    while (<TMP>) {
+	next if /^\s*\n/;
+	chop;
+	push (@list,$_);
+    }
+    close (TMP);
+} elsif ($opt_m) {
+    %readlookup = ReadLookupTable ($opt_m);
+} else {
+    if (@ARGV) {
+	$pattern = join "\|", @ARGV; # $pattern .= shift @ARGV until @ARGV==0;
+    } else {
+	$pattern .= $_ while (<>);
+    }
+    @list = split (/\|/,$pattern);
+}

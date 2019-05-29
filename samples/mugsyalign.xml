@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+	<state>incomplete</state>
+	<name>mugsy align</name>
+	<!--Preprocessing-->
+
+	<command>
+	    <type>RunUnixCommand</type>
+	    <name>create output directory</name>
+	    <state>incomplete</state>
+	    <executable>mkdir</executable>
+	    <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
+	</command>
+
+	<!--Processing-->
+	<command>
+	    <type>RunUnixCommand</type>
+	    <name>replace template keys</name>
+	    <state>incomplete</state>
+	    <executable>$;BIN_DIR$;/replace_template_keys</executable>
+	    <param>
+		<key>--template_xml</key>
+		<value>$;DOCS_DIR$;/mugsyalign_distributed_work.xml</value>
+	    </param>
+	    <param>
+		<key>--component_conf</key>
+		<value>$;COMPONENT_CONFIG$;</value>
+	    </param>
+	    <param>
+		<key>--output_xml</key>
+		<value>$;WORKFLOW_REPOSITORY$;/mugsyalign_distributed_work.xml.gz</value>
+	    </param>
+	    <param>
+		<key>--distribopts</key>
+		<value>nodistrib=$;NODISTRIB$;</value>
+	    </param>
+	    <param>
+		<key>stdout</key>
+		<value>$;OUTPUT_DIRECTORY$;/replace_template_keys.stdout</value>
+	    </param>
+	    <param>
+		<key>stderr</key>
+		<value>$;OUTPUT_DIRECTORY$;/replace_template_keys.stderr</value>
+	    </param>
+	</command>
+
+	<commandSet type="remote-serial">
+	    <state>incomplete</state>
+	    <name>mugsyalign distributed work</name>
+	    <fileName>$;WORKFLOW_REPOSITORY$;/mugsyalign_distributed_work.xml.gz</fileName>
+	    <dceSpec type="sge">
+		<OS>linux</OS>
+        <group>$;PROJECT_CODE$;</group>
+	    </dceSpec>
+	</commandSet>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>Replace organism ids in maf</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/replace_maf_ids</executable>
+            <param>
+                <key>--id_file</key>
+                <value>$;ID_MAP_FILE$;</value>
+            </param>
+            <param>
+                <key>--maf</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;OUTPUT_PREFIX$;.maf</value>
+            </param>
+            <param>
+                <key>--output_file</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;OUTPUT_PREFIX$;.maf.tmp</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;WORKFLOW_REPOSITORY$;/replace_maf_ids.stdout</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;WORKFLOW_REPOSITORY$;/replace_maf_ids.stderr</value>
+            </param>
+   	</command>
+
+	<!-- Replace the output MAF -->
+        <command>
+            <type>RunUnixCommand</type>
+            <name>Move file</name>
+            <state>incomplete</state>
+            <executable>/bin/mv</executable>
+            <arg>$;OUTPUT_DIRECTORY$;/$;OUTPUT_PREFIX$;.maf.tmp $;OUTPUT_DIRECTORY$;/$;OUTPUT_PREFIX$;.maf</arg>
+        </command>
+    </commandSet>
+</commandSetRoot>
+

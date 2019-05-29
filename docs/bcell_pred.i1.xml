@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>bcell_pred compute</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>bcell_pred analysis</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/bcell_pred</executable>
+            <arg>/usr/local/packages/Python-2.7/bin/python2.7 $;BCELL_EXEC$; -m $;METHOD$; -n $;I_FILE_PATH$;</arg>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.$;METHOD$;.raw</value>
+            </param>
+	    <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+        </command>
+    </commandSet>
+</commandSetRoot>

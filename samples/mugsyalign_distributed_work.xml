@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot type="instance">
+    <commandSet type="serial">
+	<state>incomplete</state>
+        <name>grouped sub flow</name>
+
+	<command>
+            <type>RunUnixCommand</type>
+            <name>run mugsy</name>
+            <state>incomplete</state>
+            <executable>$;MUGSY_EXEC$;</executable>
+            <arg>$;OTHER_OPTS$;</arg>
+            <param>
+                <key>--directory</key>
+                <value>$;OUTPUT_DIRECTORY$;</value>
+            </param>
+            <param>
+                <key>--fasta_file_list</key>
+                <value>$;FASTA_FILE_LIST$;</value>
+            </param>
+            <param>
+                <key>--prefix</key>
+                <value>$;OUTPUT_PREFIX$;</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.stdout</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.stderr</value>
+            </param>
+	</command>
+
+    </commandSet>
+</commandSetRoot>
+

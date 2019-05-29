@@ -1,0 +1,4 @@
+next
+----
+-added 'ENGINE = MYISAM' to all CREATE TABLE commands to preserve table engine status across all servers
+-added analyze_tables.mysql.ddl to run ANALYZE TABLE command after data has been loaded to the db

@@ -1,0 +1,5 @@
+next
+----
+-added analyze_tables.postgresql.ddl, which runs ANALYZE TABLE on certain tables after data has been loaded to the db
+-added missing DROP VIEW statements to drop_cm_views.postgresql.ddl, removed duplicate DROP TABLEs
+-changed NUMERIC(0,9) to INT for the infection module

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <state>incomplete</state>
+        <name>wga_maf2tree workflow</name>
+        <!--Preprocessing-->
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create output directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
+        </command>
+        <command>                
+            <type>RunUnixCommand</type>
+            <name>create temp directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;TMP_DIR$;</arg>
+        </command>
+        <!--Processing-->
+
+	<!-- Mugsy will append the genome name (fasta file basename) before the sequence ids in the maf. This will fix that -->
+        <command>
+            <type>RunUnixCommand</type>
+            <name>fix maf</name>
+            <state>incomplete</state>
+            <executable>perl -ne 's/^s\s+[^\.]+\.(\S+)/s $1/;print' </executable>
+	    <param>
+		<key>stdin</key>
+                <value>$;MAF_FILE$;</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/fixed.maf</value>
+            </param>
+	</command>
+
+	<!-- Create a directory for all the fasta files to be split into -->
+	<command>
+	    <type>RunUnixCommand</type>
+            <name>create fasta dir</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+	    <arg>-p -m 777 $;TMP_DIR$;/fasta</arg>
+	</command>
+
+	<!-- Split the fasta into individual files -->
+	<command>
+	    <type>RunUnixCommand</type>
+            <name>create fasta dir</name>
+            <state>incomplete</state>
+            <executable>/usr/bin/perl </executable>
+	    <arg>-0777 -ne '@f = split(/\n&gt;/); for $fsa (@f){$fsa=~s/^&gt;//;$n=$1 if($fsa=~/^(\S+)/); open(O,"&gt;$;TMP_DIR$;/fasta/$n.fsa");print O "&gt;".$fsa."\n";close(O); print "$n.fsa\n";}'</arg>
+	    <param>
+		<key>stdin</key>
+		<value>$;FASTA_FILE$;</value>
+	    </param>
+	</command>
+
+        <!-- Run phylomark prep -->
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create tree</name>
+            <state>incomplete</state>
+            <executable>cd $;OUTPUT_DIRECTORY$;;source $;PHYLOMARK_DIR$;/phylomark_env.sh;$;PHYLOMARK_DIR$;/Phylomark_prep.py</executable>
+            <param>
+                <key>--input-maf</key>
+                <value>$;MAF_FILE$;</value>              
+            </param>
+            <param>
+                <key>--fasta-dir</key>
+                <value>$;TMP_DIR$;/fasta</value>                
+            </param>
+            <param>
+                <key>--tmp-dir</key>
+                <value>$;TMP_DIR$;</value>
+            </param>
+        </command>     
+
+	<!-- Rename the output file -->
+	<command>
+            <type>RunUnixCommand</type>
+            <name>Move file</name>
+            <state>incomplete</state>
+            <executable>/bin/mv</executable>
+	    <arg>$;OUTPUT_DIRECTORY$;/wga.tree $;OUTPUT_TREE_FILE$;</arg>
+        </command>     
+	<!--Create svg and pdf files for the tree -->
+	<command>
+            <type>RunUnixCommand</type>
+            <name>Convert newick tree to svg</name>
+            <state>incomplete</state>
+            <executable>$;NEWICK_UTILITIES$;/nw_display </executable>
+	    <arg>-s -w 950 -b 'opacity:0' -l 'font-size:large' $;OUTPUT_TREE_FILE$; > $;OUTPUT_TREE_FILE$;.svg</arg>
+        </command>     
+	<command>
+            <type>RunUnixCommand</type>
+            <name>Convert newick tree to pdf</name>
+            <state>incomplete</state>
+            <executable>$;RASTERIZER_PATH$; </executable>
+	    <arg>$;OUTPUT_TREE_FILE$;.svg pdf 1000 1000</arg>
+        </command>     
+    </commandSet>    
+</commandSetRoot>                

@@ -1,0 +1,85 @@
+#!/bin/sh
+if [ -z "$SCHEMA_DOCS_DIR" ]
+then
+    SCHEMA_DOCS_DIR=
+export SCHEMA_DOCS_DIR
+fi
+if [ -z "$WORKFLOW_WRAPPERS_DIR" ]
+then
+    WORKFLOW_WRAPPERS_DIR=/usr/local/projects/ergatis/package-revac//bin
+export WORKFLOW_WRAPPERS_DIR
+fi
+if [ -z "$WORKFLOW_DOCS_DIR" ]
+then
+    WORKFLOW_DOCS_DIR=
+export WORKFLOW_DOCS_DIR
+fi
+
+
+umask 0000
+
+unset PERL5LIB
+unset LD_LIBRARY_PATH
+
+LANG=C
+export LANG
+LC_ALL=C
+export LC_ALL
+#Exporting psortb3 for use
+export PATH=$PATH:/usr/local/packages/psortb-3.0.3/psort/bin
+export PERL5LIB=$PERL5LIB:/usr/local/packages/psortb-3.0.3/lib64/perl5/site_perl/5.8.8/x86_64-linux-thread-multi
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/packages/psortb-3.0.3/prereqs/lib64.
+
+#Actual script starts here.
+psort_path=${BASH_ARGV[${#BASH_ARGV[@]}-1]}
+output_path=$BASH_ARGV
+regex=".fsa"
+
+for i in "${BASH_ARGV[@]}"  
+do if [[ "$i" =~ $regex ]]; then 
+	
+	file=$i;
+	
+fi
+done
+
+for i in "${!BASH_ARGV[@]}"; do
+   if [[ "${BASH_ARGV[$i]}" = "${file}" ]]; then
+      fsaid="${i}";
+   fi
+done
+
+#echo "$fsaid"
+
+list=$(echo "${BASH_ARGV[@]}")
+
+#echo "$list"
+arr=($list)
+#unset arr[0]
+#unset arr[$fsaid]
+#unset arr[${#BASH_ARGV[@]}-1]
+
+#####
+reverse()
+{        
+  local arrayname=${1:?Array name required} array revarray e
+
+  eval "array=( \"\${$arrayname[@]}\" )"
+
+  for e in "${array[@]}"
+  do
+    revarray=( "$e" "${revarray[@]}" )
+  done
+  
+  eval "$arrayname=( \"\${revarray[@]}\" )"
+}
+
+
+reverse arr
+args=$(echo "${arr[@]}")
+
+eval "$args"
+
+#####
+
+

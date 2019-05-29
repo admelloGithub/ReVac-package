@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <state>incomplete</state>
+        <name>orthomcl workflow</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create output directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>create temp directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;TMP_DIR$;</arg>
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Creating Mysql db config</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/orthomcl-setup-database.pl</executable>
+            <arg>--user $;USER$; --password $;PASS$; --host $;HOST$; --database orthomcl --outfile $;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.db.config --no-create-database</arg>
+			<param>  
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.db.config.stderr</value>
+            </param>
+        </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>Deleting Orthomcl Mysql tables if present</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/drop-mysql-tables.sh</executable>
+            <arg>$;USER$; $;PASS$; orthomcl $;HOST$;</arg>
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Setting up Database Tables</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/orthomclInstallSchema</executable>
+			<arg>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.db.config $;OUTPUT_DIRECTORY$;/install_schema.log</arg>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.dbsetup.stderr</value>
+            </param>
+        </command>
+         <command>
+            <type>RunUnixCommand</type>
+            <name>create fasta directory</name>
+            <state>incomplete</state>
+            <executable>mkdir</executable>
+            <arg>-p -m 777 $;OUTPUT_DIRECTORY$;/fasta/</arg>
+        </command>
+		<command>
+			<type>RunUnixCommand</type>
+          	<name>Copying Multifasta</name>
+          	<state>incomplete</state>
+         	<executable>cat $;MULTI_FASTA$; >$;OUTPUT_DIRECTORY$;/fasta/goodProteins.fasta</executable>
+		</command>
+		<command>
+           <type>RunUnixCommand</type>
+           <name>Checking blast</name>
+           <state>incomplete</state>
+           <executable>sed -i 's/\.polypeptide\.[0-9]*\.1//g' $;BLAST_FILE$;</executable>
+        </command>
+		<command>
+           <type>RunUnixCommand</type>
+           <name>Parsing All-v-All blast</name>
+           <state>incomplete</state>
+           <executable>$;BIN_DIR$;/orthomclBlastParser</executable>
+           <arg>$;BLAST_FILE$; $;OUTPUT_DIRECTORY$;/fasta/</arg>
+		   <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/similarSequences.txt</value>
+           </param>
+           <param>
+               <key>stderr</key>
+               <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.blastparse.stderr</value>
+           </param>
+       </command>
+		<command>
+           <type>RunUnixCommand</type>
+           <name>Loading Blast results into database</name>
+           <state>incomplete</state>
+           <executable>$;BIN_DIR$;/orthomclLoadBlast</executable>
+           <arg>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.db.config $;OUTPUT_DIRECTORY$;/similarSequences.txt</arg>
+           <param>
+               <key>stderr</key>
+               <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.out.stderr</value>
+           </param>
+       </command>
+		<command>
+             <type>RunUnixCommand</type>
+             <name>Finding OrthomclPairs</name>
+             <state>incomplete</state>
+             <executable>$;BIN_DIR$;/orthomclPairs</executable>
+             <arg>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.db.config $;OUTPUT_DIRECTORY$;/pairs.log cleanup=$;CLEANUP$;</arg>
+             <param>
+                 <key>stderr</key>
+                 <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.out.stderr</value>
+             </param>
+         </command>
+		<command>
+             <type>RunUnixCommand</type>
+             <name>Dumping OrthomclPairs from mysql db</name>
+             <state>incomplete</state>
+             <executable>$;BIN_DIR$;/orthomclDumpPairsFiles</executable>
+             <arg>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.db.config $;OUTPUT_DIRECTORY$;</arg>
+             <param>
+                 <key>stderr</key>
+                 <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.out.stderr</value>
+             </param>
+         </command>
+		<command>
+             <type>RunUnixCommand</type>
+             <name>Running mcl clustering</name>
+             <state>incomplete</state>
+             <executable>$;MCL_EXEC$;</executable>
+             <arg>$;OUTPUT_DIRECTORY$;/mclInput --abc -I 2.0 -o $;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.mcloutput.raw</arg>
+             <param>
+                 <key>stderr</key>
+                 <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.out.stderr</value>
+             </param>
+         </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Creating cluster groups file</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/orthomclMclToGroups</executable>
+            <arg>orthomcl_cluster 0001 $;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.mcloutput.raw</arg>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.groups.txt</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.out.stderr</value>
+            </param>
+         </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Creating othromcl2table file</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/orthomcl2table.pl</executable>
+            <arg>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.groups.txt</arg>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/Orthomcl2table.out</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;2table.out.stderr</value>
+            </param>
+         </command>
+		 <command>
+            <type>RunUnixCommand</type>
+            <name>Deleting Orthomcl Mysql tables</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/drop-mysql-tables.sh</executable>
+            <arg>$;USER$; $;PASS$; orthomcl $;HOST$;</arg>
+		</command>
+    </commandSet>
+</commandSetRoot>

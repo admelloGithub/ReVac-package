@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>SSR_finder_protein compute</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>SSR_finder_protein</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/SSR_finder_protein.pl</executable>
+			<arg>$;OUTPUT_DIRECTORY$;/ $;I_FILE_PATH$;</arg>
+            <param>  
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param> 
+        </command>
+    </commandSet>
+</commandSetRoot>

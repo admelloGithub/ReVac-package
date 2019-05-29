@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+   <commandSet type="serial">
+       <state>incomplete</state>
+       <name>PanOCT workflow</name>
+       <!--Preprocessing-->
+       <command>
+           <type>RunUnixCommand</type>
+           <name>create output directory</name>
+           <state>incomplete</state>
+           <executable>mkdir</executable>
+           <arg>-p -m 777 $;OUTPUT_DIRECTORY$;</arg>
+       </command>
+       <command>
+           <type>RunUnixCommand</type>
+           <name>create temp directory</name>
+           <state>incomplete</state>
+           <executable>mkdir</executable>
+           <arg>-p -m 777 $;TMP_DIR$;</arg>
+       </command>
+		<command>
+           <type>RunUnixCommand</type>
+           <name>Creating Gene tags and attributes files</name>
+           <state>incomplete</state>
+           <executable>$;BIN_DIR$;/gff2gene_att.pl</executable>
+           <arg>$;INPUT_FILE_LIST$; $;OUTPUT_DIRECTORY$;</arg>
+       </command>
+		<command>
+           <type>RunUnixCommand</type>
+           <name>Stripping Blast file IDs</name>
+           <state>incomplete</state>
+           <executable>sed -i 's/\.polypeptide\.[0-9]*\.1//' $;BLAST_FILE$;</executable>
+       </command>
+		<command>
+           <type>RunUnixCommand</type>
+           <name>Stripping Fasta file IDs</name>
+           <state>incomplete</state>
+           <executable>sed -i 's/\.polypeptide\.[0-9]*\.1//' $;PEP_FILE$;</executable>
+       </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>PanOCT</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/panoct.pl</executable>
+            <arg>-t $;BLAST_FILE$; -f $;OUTPUT_DIRECTORY$;/gene_tags.txt -g $;OUTPUT_DIRECTORY$;/gene_atts.txt -P $;PEP_FILE$; -O $;OUTPUT_DIRECTORY$; $;OTHER_OPTS$; </arg>
+            <param>  
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;.stderr</value>
+            </param> 
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>PanOCT2table</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/panoct2table.pl</executable>
+            <arg>$;OUTPUT_DIRECTORY$;/matchtable.txt</arg>
+			<param>
+               <key>stdout</key>
+               <value>$;OUTPUT_DIRECTORY$;/PanOCT2table.out</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;COMPONENT_NAME$;2table.stderr</value>
+            </param>
+        </command>
+   </commandSet>
+</commandSetRoot>

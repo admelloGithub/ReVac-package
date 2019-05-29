@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>epitope_cluster compute</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>epitope_cluster analysis</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/epitope_cluster</executable>
+            <arg>$;EPI_CLUSTER_EXEC$; --threshold=$;THRESHOLD$; --unique=$;UNIQUE$; $;I_FILE_PATH$;</arg>
+	    <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.raw</value>
+            </param>
+	 </command>
+    </commandSet>
+</commandSetRoot>

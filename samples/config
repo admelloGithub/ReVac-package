@@ -1,0 +1,8 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/jorvis/ergatis.git
+	fetch = +refs/tags/v2r19b4:refs/tags/v2r19b4

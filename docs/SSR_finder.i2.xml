@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>Phase Variation Vs ORFs</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>Finding SSRs in ORFs</name>
+            <state>incomplete</state>
+            <executable>$;PHV_VS_ORF$;</executable>
+			<param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.ssr_genes</value>
+            </param>
+            <param>  
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+            <arg>$;I_DIR$;/$;I_FILE_BASE$;.ssr $;I_DIR$;/$;I_FILE_BASE$;.genes</arg>
+        </command>
+		 <command>
+            <type>RunUnixCommand</type>
+            <name>Making SSR2table file</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/SSR_finder2table.pl</executable>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;2table.out</value>
+            </param>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;2table.stderr</value>
+            </param>
+			<arg>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.ssr_genes</arg>
+		</command>
+    </commandSet>
+</commandSetRoot>

@@ -1,0 +1,5 @@
+chado-v1r8b2
+------------
+-added analyze_tables.sybase.ddl which runs VALIDATE TABLE on tables after data has been loaded to the db
+-feature.uniquename changed from VARCHAR(50) to VARCHAR(255)
+-featureloc.residue_info changed from TEXT to VARCHAR(255)

@@ -1,0 +1,282 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+pipearch - Archive and compress an Ergatis pipeline and its output.
+
+=head1 SYNOPSIS
+
+USAGE: template.pl 
+            --project_directory=/usr/local/projects/foo
+            --pipeline_id=3035
+          [ --log=/path/to/somefile.log 
+          ]
+
+=head1 OPTIONS
+
+B<--project_directory,-p>
+    Path to the base directory of a project.  Under this we should find 'workflow' and
+    'output_repository' directories.
+
+B<--pipeline_id,-i>
+    Numerical ID for an Ergatis pipeline.
+
+B<--log,-l> 
+    Log file
+
+B<--help,-h>
+    This help message
+
+=head1  DESCRIPTION
+
+This script is used to archive an Ergatis pipeline in place within the project's area, but creates
+individual tarballs for each component's output and runtime directories rather than compressing
+individual files.
+
+=head1  INPUT
+
+For some defined project area (--project_area) and pipeline ID (--pipeline_id) this script
+assumes the following directories for a given pipeline with components 1 .. N
+
+    $project/output_repository/$component1/${pipeline_id}_*
+    $project/output_repository/$component2/${pipeline_id}_*
+    ...
+    $project/output_repository/$componentN/${pipeline_id}_*
+    
+    
+    $project/workflow/runtime/$component1/${pipeline_id}_*
+    $project/workflow/runtime/$component2/${pipeline_id}_*
+    ...
+    $project/workflow/runtime/$componentN/${pipeline_id}_*
+
+Where each of the lowest-level directories above are named like 'PIPELINEID_TOKEN' where 'token' 
+can be any user-defined label.  It is at this level that tarball's are created.
+
+=head1  OUTPUT
+
+Each of the PIPELINEID_TOKEN directories mentioned in the INPUT section above is removed and
+replaced by a tarball of itself with the same name but including the '.tar.gz' extension.
+
+=head1 EXIT STATUS CODES
+
+Exit(0) - Exited just fine and the script ran to completion
+
+Exit(1) - Archival was not successful due to an issue with the 'tar' command or due to a core dump
+
+Exit(2) - Process was interrupted with an interruption signal (such as Ctrl-C in the Terminal)
+
+Exit(3) - Lock file for the pipeline was already present which means pipeline is currently in the process of being archived by another job.  
+
+=head1  CONTACT
+
+    Shaun Adkins
+    sadkins@som.umaryland.edu
+
+=cut
+
+use strict;
+use Getopt::Long qw(:config no_ignore_case no_auto_abbrev pass_through);
+use Pod::Usage;
+
+
+my %options = ();
+my $results = GetOptions (\%options, 
+                          'project_directory|p=s',
+                          'pipeline_id|i=s',
+                          'log|l=s',
+                          'help|h') || pod2usage();
+
+## display documentation
+if( $options{'help'} ){
+    pod2usage( {-exitval => 0, -verbose => 2, -output => \*STDOUT} );
+}
+
+my ($pipeline, $repository);
+## make sure everything passed was peachy
+&check_parameters(\%options);
+
+## open the log if requested
+my $logfh;
+if (defined $options{log}) {
+    open($logfh, ">$options{log}") || die "can't create log file: $!";
+}
+
+my $lock = "/usr/local/scratch/sadkins_devel/arch_jobs/" . $pipeline . ".arch.lock";
+_log("Creating lock file $lock...");
+
+if (-e $lock) {
+    _log("Another job is archiving pipeline $pipeline");
+    mail_to();
+    exit(3); 	#exit if another process is already running 
+}
+
+open LOCK, ">$lock" or die "Cannot create lock file $lock: $!\n";
+print LOCK "$pipeline\t$repository\n";
+close LOCK;
+chmod 0777, $lock;	# in case 3rd-party user needs to remove
+
+$SIG{INT} = \&capture_ctrl_c;
+
+my $start = localtime;
+
+my $runtime = $repository . "/workflow/runtime/";
+my $output_r = $repository . "/output_repository/";
+
+## check the expected directory structure
+check_file_layout( $repository, $pipeline );
+
+archive_pipeline();
+
+my $end = localtime;
+_log("Start:\t" . $start);
+_log("End:\t" . $end);
+
+_log("removing lock $lock...");
+_log("SUCCESS!!!");
+unlink($lock);
+exit(0);
+
+sub check_file_layout {
+    my ($proj_dir, $id) = @_;
+    
+    unless ( -d "$proj_dir/workflow/runtime" ) {
+	_log("ERROR: expected to find $proj_dir/workflow/runtime");
+        _log("removing lock $lock...");
+	unlink($lock);
+	mail_to();
+        die "ERROR: expected to find $proj_dir/workflow/runtime";
+    }
+    
+    unless ( -d "$proj_dir/output_repository" ) {
+	_log("ERROR: expected to find $proj_dir/output_repository");
+        _log("removing lock $lock...");
+	unlink($lock);
+	mail_to();
+        die "ERROR: expected to find $proj_dir/output_repository";
+    }
+    
+    ## conventional location for this pipeline
+    unless ( -d "$proj_dir/workflow/runtime/pipeline/$id" ) {
+	_log("ERROR: pipeline XML directory for pipeline $id not found.  Quitting.");
+        _log("removing lock $lock...");
+	unlink($lock);
+	mail_to();
+        die "ERROR: pipeline XML directory for pipeline $id not found.  Quitting.";
+    }
+}
+
+
+
+sub archive_pipeline {
+    my $run_cmd = "find $runtime -maxdepth 2 -name '$pipeline*' -type d |";
+    my $out_cmd = "find $output_r -maxdepth 2 -name '$pipeline*' -type d |";   
+     _log("\nArchiving runtime files....");
+    arch($run_cmd);
+    _log("\nArchiving output files...");
+    arch($out_cmd);
+
+}
+
+sub arch {
+    my $command = shift;
+    open FIND, $command or die "Cannot open 'find' results: $!\n";
+    while (<FIND>) {
+	chomp;
+	my $path = $_;
+        next if ($path =~ "\/pipeline\/");	# skip the pipeline directory
+	#_log("\t" . $path . "\n");
+
+	my $temp;
+	if ($path =~ /$repository(.+)/) {	#gather all of the directory path after repo root
+	    $temp = '/local/scratch/pipearch/' . $pipeline . '/' . $1;
+	}
+
+	system ("mkdir -m 777 -p $temp");	# Make temp directory in scratch to archive to
+	if ( $? != 0) {	
+		_log("Cannot make directory $temp to archive into.  $!");
+		_log("removing lock $lock...\n");
+		unlink($lock);
+		mail_to();
+		die;
+	}	
+
+	my $cmd = "tar -czf $temp" . ".tar.gz $path";	#tars the current directory into the scratch path 
+	my $success = 1;	# if unsucessful, this will change to 0
+        _log("DEBUG: running: $cmd");
+
+	system ($cmd);
+
+        if ($? == -1) {
+            _log ("failed to execute: $!");
+            $success = 0;
+        } elsif ($? & 127) {
+	    _log("child died with signal %d, %s coredump\n", ($? & 127),  ($? & 128) ? 'with' : 'without');
+            $success = 0;
+        } elsif ($? != 0) {
+	    _log("child exited with value %d\n", $?>>8);
+	    $success = 0;
+	}
+
+	if ( $success ) {
+	    system ("mv $temp.tar.gz $path.tar.gz");	# Move archived contents from scratch back to original area
+	    system ("rm -rf /local/scratch/pipearch/$pipeline ");	# remove temp directory
+	    system ("rm -rf $path");	# remove original (unarchived contents)
+	} else {
+            print STDERR "ERROR ($success): the following command failed: $cmd\n";
+	    _log("Command $cmd not successful...removing lock $lock...\n");
+	    unlink($lock);
+	    mail_to();
+	    exit(1);
+	}
+    }
+    close FIND;
+}
+
+sub capture_ctrl_c {
+    _log("Ctrl-C was hit.  Archiving will stop");
+    _log("removing lock $lock...");
+    unlink($lock);
+    mail_to();
+    exit(2);
+}
+
+sub mail_to {
+    my (undef, $mon, $day, undef, $year) = split(/\s+/, localtime);
+    my $subject = "Pipeline " . $pipeline . "--" . $mon.'_'.$day.'_'.$year . " Archivng Error Report";
+    my $email = 'sadkins@som.umaryland.edu';
+
+    if (defined $logfh) {
+   	 my $mail_cmd = "mail -s \"$subject\" $email < $options{'log'}";
+   	 system($mail_cmd);
+    }
+
+}
+
+sub _log {
+    my $msg = shift;
+    
+    printf "$msg\n";
+    print $logfh "$msg\n" if $logfh;
+}
+
+
+sub check_parameters {
+    my $options = shift;
+    
+    ## make sure required arguments were passed
+    my @required = qw( project_directory pipeline_id );
+    for my $option ( @required ) {
+        unless(defined $$options{$option}) {
+            die "--$option is a required option";
+        }
+    }
+    
+    $repository = $options{'project_directory'};
+    $pipeline = $options{'pipeline_id'};
+    ##
+    ## you can do other things here, such as checking that files exist, etc.
+    ##
+    
+    ## handle some defaults
+    #$options{optional_argument2}   = 'foo'  unless ($options{optional_argument2});
+}

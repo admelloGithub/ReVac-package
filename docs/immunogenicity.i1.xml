@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>immunogenicity compute</name>
+		<command>
+			<type>RunUnixCommand</type>
+            <name>immunogenicity concat</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/immunogenicity_concat.pl</executable>
+            <arg>$;I_FILE_PATH$; $;CTL_INPUT_FILE$;</arg>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.concat.stderr</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.concat.raw</value>
+            </param>
+         </command>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>immunogenicity analysis</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/immunogenicity</executable>
+            <arg>$;IMMUNOGENICITY_EXEC$; $;CUSTOM_MASK$; $;ALLELE$; $;OUTPUT_DIRECTORY$;/$;COMPONENT_NAME$;.concat.raw</arg>
+		    <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+            <param>
+                <key>stdout</key>
+                <value>$;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.raw</value>
+            </param>
+		 </command>
+         <command>
+            <type>RunUnixCommand</type>
+            <name>Processing immunogenicity output to significant peptides and generation of 2 column table</name>
+            <state>incomplete</state>
+            <executable>$;BIN_DIR$;/immunogenicity2table.pl</executable>
+			<arg>$;OUTPUT_DIRECTORY$;/cutoff_file $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.raw $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;2table.out</arg>
+		</command>
+    </commandSet>
+</commandSetRoot>

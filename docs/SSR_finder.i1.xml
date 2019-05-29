@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>SSR_finder No mismatch compute</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>Generating Raw SSR output</name>
+            <state>incomplete</state>
+            <executable>/usr/local/projects/ergatis/package-revac/bin/SSR_finder2_NoMismatch.pl</executable>
+            <param>  
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+            <arg>$;I_FILE_PATH$; $;OUTPUT_DIRECTORY$;</arg>
+        </command>
+		<command>
+            <type>RunUnixCommand</type>
+            <name>Converting Raw SSR output to .ssr files</name>
+            <state>incomplete</state>
+            <executable>/usr/local/projects/ergatis/package-revac/bin/SSR_finder2_2tabbed.pl</executable>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+            </param>
+            <arg>$;OUTPUT_DIRECTORY$;/$;I_FILE_BASE$;.fsa.ssr.txt</arg>
+        </command>
+    </commandSet>
+</commandSetRoot>

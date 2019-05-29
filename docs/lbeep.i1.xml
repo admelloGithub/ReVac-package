@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation='commandSet.xsd'>
+    <commandSet type="serial">
+        <name>lbeep compute</name>
+        <command>
+            <type>RunUnixCommand</type>
+            <name>lbeep</name>
+            <state>incomplete</state>
+            <executable>/home/admello/Desktop/LBEEP-master/lbeep</executable>
+            <arg>-i $;I_FILE_PATH$; -m $;MODE$; -l $;LENGTH$; -M $;MODEL$; -t $;THRESHOLD$; -o $;OUTPUT_DIRECTORY$;/$;ITERATOR_NAME$;/g$;GROUP_NUMBER$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.raw</arg>
+            <param>
+                <key>stderr</key>
+                <value>$;TMP_DIR$;/$;I_FILE_BASE$;.$;COMPONENT_NAME$;.stderr</value>
+			</param>
+        </command>
+    </commandSet>
+</commandSetRoot>

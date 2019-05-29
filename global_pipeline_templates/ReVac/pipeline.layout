@@ -1,0 +1,247 @@
+<commandSetRoot xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="commandSet.xsd" type="instance">
+    <commandSet type="serial">
+        <state>incomplete</state>
+        <name>start</name>
+        <commandSet type="serial">
+            <state>incomplete</state>
+            <commandSet type="serial">
+                <state>incomplete</state>
+                <commandSet type="serial">
+                    <state>incomplete</state>
+                    <name>genbank2bsml.default</name>
+                </commandSet>
+                <commandSet type="serial">
+                    <state>incomplete</state>
+                    <commandSet type="parallel">
+                        <state>incomplete</state>
+                        <commandSet type="serial">
+                            <state>incomplete</state>
+                            <name>bsml2fasta.polyp</name>
+                        </commandSet>
+                        <commandSet type="serial">
+                            <state>incomplete</state>
+                            <name>bsml2fasta.dna</name>
+                        </commandSet>
+                        <commandSet type="serial">
+                            <state>incomplete</state>
+                            <name>bsml2fasta.dna_coords</name>
+                        </commandSet>
+                        <commandSet type="serial">
+                            <state>incomplete</state>
+                            <name>bsml2fasta.dna_byfile</name>
+                        </commandSet>
+                        <commandSet type="serial">
+                            <state>incomplete</state>
+                            <name>bsml2fasta.byfile_p</name>
+                        </commandSet>
+                        <commandSet type="serial">
+                            <state>incomplete</state>
+                            <name>bsml2ptt.default</name>
+                        </commandSet>
+                    </commandSet>
+                    <commandSet type="serial">
+                        <state>incomplete</state>
+                        <commandSet type="parallel">
+                            <state>incomplete</state>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>split_multifasta.polyp</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>split_multifasta.dna</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>split_multifasta.dna_coords</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>formatdb.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>xdformat.default</name>
+                            </commandSet>
+                        </commandSet>
+                    </commandSet>
+                    <commandSet type="serial">
+                        <state>incomplete</state>
+                        <commandSet type="parallel">
+                            <state>incomplete</state>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>psortb.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>lipop.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>tmhmm.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>signalp.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>extract_CDS_features.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>spaan.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>islandpath.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3_att.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>RAPSearch2.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Tfambac</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Tfamsec</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Tfamsig</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Tfamsur</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Pfamsur</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Pfamsig</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Pfambac</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>hmmpfam3.Pfamsec</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>antigenic.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>mhc_class_i_all.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>mhc_class_ii_all.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>netctlpan_all.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>bcell_pred_all.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>blat.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>ncbi-blastp.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>wu-blastp.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>autoimmunity.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>autoimmunity_commensals.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>SSR_finder_protein.default</name>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <name>SSR_finder.default</name>
+                            </commandSet>
+                        </commandSet>
+                        <commandSet type="serial">
+                            <state>incomplete</state>
+                            <commandSet type="parallel">
+                                <state>incomplete</state>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>attributor.default</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>immunogenicity.default</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>PanOCT.default</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>orthomcl.default</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>lsbsr.default</name>
+                                </commandSet>
+                            </commandSet>
+                            <commandSet type="serial">
+                                <state>incomplete</state>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>jaccard.default</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>muscle.jaccard</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>j_ortholog_clusters.default</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>muscle.j_ortholog_clusters</name>
+                                </commandSet>
+                                <commandSet type="serial">
+                                    <state>incomplete</state>
+                                    <name>summary_table.default</name>
+                                </commandSet>
+                            </commandSet>
+                        </commandSet>
+                    </commandSet>
+                </commandSet>
+            </commandSet>
+        </commandSet>
+    </commandSet>
+</commandSetRoot>
